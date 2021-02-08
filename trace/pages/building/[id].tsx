@@ -1,20 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Building from "components/Building/BuildingDetail";
-import Axios from "axios";
 import { useRouter } from "next/dist/client/router";
+import { RootState } from "Redux";
+import { useSelector, useDispatch } from "react-redux";
+import { buildingReviewReq } from "Redux/buildingReview";
 
 export default () => {
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const dispatch = useDispatch();
+    const [curBuilding, setCurbuilding] = useState(null);
+    const { isLoading, content } = useSelector(
+        (state: RootState) => state.building
+    );
 
-    // 빌딩 리뷰 조회!
-    // const { data, error } = useSWR(`/api/v1/buildingId=${router.query.id}`, fetcher);
+    const { reviewList } = useSelector(
+        (state: RootState) => state.buildingReview
+    );
+    const curid = Number(router.query.id);
+    const getCurbuildingInfo = useCallback(() => {
+        if (content) {
+            const curInfo = content.find(({ id }: any) => id === curid);
+            setCurbuilding(curInfo);
+        }
+    }, [content, curid]);
 
     useEffect(() => {
-        setTimeout(() => {
-            setLoading(() => false);
-        }, 1000);
-    }, []);
+        getCurbuildingInfo();
+        dispatch(buildingReviewReq(curid));
+    }, [getCurbuildingInfo, content, curid]);
 
-    return <Building loading={loading} />;
+    return (
+        <Building
+            isLoading={isLoading}
+            curBuilding={curBuilding}
+            review={reviewList}
+        />
+    );
 };
