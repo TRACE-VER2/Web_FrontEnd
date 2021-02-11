@@ -1,7 +1,7 @@
 import { all, call, fork, put, takeLatest } from "redux-saga/effects";
 import {
-    reviewWriteFailure,
-    reviewWriteSubmit,
+    reviewWriteFail,
+    reviewWriteReq,
     reviewWriteSuccess,
 } from "Redux/review";
 import axios from "axios";
@@ -9,11 +9,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { ReviewSubmit } from "../@types/interface";
 import { dataUrlToFormData } from "lib/dataUrlToFormData";
 
-// 주소, 지번 분리 필요.
-
-// 글쓰기 업로드 서버에 요청
-
-function writePost(data: any) {
+function reviewWriteApiReq(data: any) {
     return axios.post("/api/v1/reviews", data, {
         headers: {
             "Content-Type": "multipart/form-data",
@@ -21,23 +17,23 @@ function writePost(data: any) {
     });
 }
 
-function* writeSubmit({ payload }: PayloadAction<ReviewSubmit>) {
+function* writeReviewSubmit({ payload }: PayloadAction<ReviewSubmit>) {
     try {
         console.log(payload);
         const formData = yield call(dataUrlToFormData, payload, "images");
-        yield call(writePost, formData);
+        yield call(reviewWriteApiReq, formData);
         yield put(reviewWriteSuccess());
     } catch (err) {
         console.error(err);
-        yield put(reviewWriteFailure(err.message));
+        yield put(reviewWriteFail());
     }
 }
 
 // 글쓰기 업데이트 상황 지켜보는 것.
-function* watchWriteSubmit() {
-    yield takeLatest(reviewWriteSubmit, writeSubmit);
+function* watchWriteReviewSubmit() {
+    yield takeLatest(reviewWriteReq, writeReviewSubmit);
 }
 
-export default function* reviewSaga(): Generator {
-    yield all([fork(watchWriteSubmit)]);
+export default function* reviewWriteSaga(): Generator {
+    yield all([fork(watchWriteReviewSubmit)]);
 }
