@@ -120,6 +120,7 @@ interface Props {
 
 const BuildingDetail = ({ isLoading, curBuilding, review }: Props) => {
     console.log(review);
+
     return (
         <Container>
             {isLoading ? (
@@ -153,12 +154,14 @@ const BuildingDetail = ({ isLoading, curBuilding, review }: Props) => {
                                     </div>
                                     <div>
                                         <span>건물이름</span>
-                                        <span>트레이서 빌딩</span>
+                                        <span>정보없음</span>
                                     </div>
                                     <div>
                                         <span>준공년도</span>
                                         <span>
-                                            {curBuilding.completionDate}년
+                                            {curBuilding.completionDate
+                                                ? `${curBuilding.completionDate}년`
+                                                : "정보없음"}
                                         </span>
                                     </div>
                                 </>
